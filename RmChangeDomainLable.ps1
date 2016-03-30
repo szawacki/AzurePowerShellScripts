@@ -74,13 +74,14 @@ Function GetRdpFile()
     Get-AzureRmRemoteDesktopFile -ResourceGroupName $ResourceGroupName -Name $VirtualComputerName -LocalPath $RdpFilePath
 
     # Set new FQDN to rdp file
-    $Content = [System.IO.File]::ReadAllText($RdpFilePath) -ireplace 'full address:s:.+', "full address:s:$((Get-AzureRmPublicIpAddress -ResourceGroupName $ResourceGroupName -Name $PublicIpName).DnsSettings.Fqdn)"
+    $Fqdn = (Get-AzureRmPublicIpAddress -ResourceGroupName $ResourceGroupName -Name $PublicIpName).DnsSettings.Fqdn
+    $Content = [System.IO.File]::ReadAllText($RdpFilePath) -ireplace 'full address:s:.+', "full address:s:$($Fqdn)"
     [System.IO.File]::WriteAllText($RdpFilePath, $Content)
 
     if ($VirtualComputerUsername) 
     {
         # Add user name if set
-        Add-Content -Path $RdpFilePath -Value "`r`nusername:s:$($VirtualComputerUsername)"
+        Add-Content -Path $RdpFilePath -Value "`r`nusername:s:$($Fqdn)\$($VirtualComputerUsername)"
     }
     Write-Host "RDP file downloaded to: '$($RdpFilePath)'"
 }
