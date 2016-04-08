@@ -1,0 +1,13 @@
+Function Convert-TimeZone 
+{  
+    [CmdletBinding()]            
+    Param(  [Parameter(Mandatory=$true)]            
+            [ValidateNotNullOrEmpty()]            
+            [DateTime]$DateTime,            
+            [String]$ToTimeZone  = ([System.TimeZoneInfo]::UTC).id            
+    )            
+
+    $ToTimeZoneObj  = [System.TimeZoneInfo]::GetSystemTimeZones() | Where-Object { $_.id -eq $ToTimeZone }            
+             
+    [System.TimeZoneInfo]::ConvertTime($DateTime, $ToTimeZoneObj)                     
+}
