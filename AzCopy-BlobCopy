@@ -1,0 +1,30 @@
+Function AzCopy-BlobCopy
+{
+    Param(  [string]$BlobName,
+            [string]$SourceStorageAccountName,
+            [string]$SourceStorageAccountContainerName,
+            [string]$DestinationSubscription,
+            [string]$DestinationResourceGroupName,
+            [string]$DestinationStorageAccountName,
+            [string]$DestinationStorageAccountContainerName
+    )
+    
+    # Path may differ depending on installed version of AzCopy #
+    $AzCopyPath = "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe"
+    
+    # Source storage account key obtained from azure protal #
+    $SourceKey = "<Source key>" 
+
+    # Login to destination subscription #
+    Login-AzureRmAccount -Credential (Get-Credential -Message "Provide username and password.") -SubscriptionName $DestinationSubscription
+
+    # Get destination storage account key #
+    $DestinationKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $DestinationResourceGroupName -Name $DestinationStorageAccountName).Key1
+
+    # Copy the blob #    
+    & $AzCopyPath "/Source:https://$($SourceStorageAccountName).blob.core.windows.net/$($SourceStorageAccountContainerName)/",`
+                  "/Dest:https://$($DestinationStorageAccountName).blob.core.windows.net/$($DestinationStorageAccountContainerName)/",`
+                  "/Pattern:$($BlobName)",` 
+                  "/DestKey:$($DestinationKey)",` 
+                  "/SourceKey:$($SourceKey)"
+}
