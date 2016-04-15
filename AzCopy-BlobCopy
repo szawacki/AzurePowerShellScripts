@@ -1,24 +1,71 @@
-Function AzCopy-BlobCopy
-{
-    Param(  [string]$BlobName,
+Function AzCopy-BlobCopy()
+{    
+    Param(  [ValidateNotNullOrEmpty()]
+            [Parameter(Mandatory=$True)]
+            [string]$BlobName,
+
+            [ValidateNotNullOrEmpty()]
+            [Parameter(Mandatory=$True)]
+            [string]$SourceSubscription,
+
+            [ValidateNotNullOrEmpty()]
+            [Parameter(Mandatory=$True)]
+            [string]$SourceResourceGroupName,
+
+            [ValidateNotNullOrEmpty()]
+            [Parameter(Mandatory=$True)]
             [string]$SourceStorageAccountName,
+
+            [ValidateNotNullOrEmpty()]
+            [Parameter(Mandatory=$True)]
             [string]$SourceStorageAccountContainerName,
+
+            [ValidateNotNullOrEmpty()]
+            [Parameter(Mandatory=$True)]
             [string]$DestinationSubscription,
+
+            [ValidateNotNullOrEmpty()]
+            [Parameter(Mandatory=$True)]
             [string]$DestinationResourceGroupName,
+
+            [ValidateNotNullOrEmpty()]
+            [Parameter(Mandatory=$True)]
             [string]$DestinationStorageAccountName,
+
+            [ValidateNotNullOrEmpty()]
+            [Parameter(Mandatory=$True)]
             [string]$DestinationStorageAccountContainerName
     )
+
+    $Credential = Get-Credential -Message "Provide username and password."
     
-    # Path may differ depending on installed version of AzCopy #
     $AzCopyPath = "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe"
     
-    # Source storage account key obtained from azure protal #
-    $SourceKey = "<Source key>" 
+    # Login into source subscription
+    $SourceContext = Login-AzureRmAccount -Credential $Credential -SubscriptionName $SourceSubscription
 
-    # Login to destination subscription #
-    Login-AzureRmAccount -Credential (Get-Credential -Message "Provide username and password.") -SubscriptionName $DestinationSubscription
+    if (!$SourceContext)
+    {
+        # End if login fails
+        return    
+    }
 
-    # Get destination storage account key #
+    # Get source storage account key
+    $SourceKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $SourceResourceGroupName -Name $SourceStorageAccountName).Key1 
+
+    # Login into destination subscription
+    if ($SourceSubscription -ine $DestinationSubscription)
+    {
+        $DestinationContext = Login-AzureRmAccount -Credential $Credential -SubscriptionName $DestinationSubscription
+
+        if(!$DestinationContext)
+        {
+            # End if login fails
+            return
+        }
+    }
+
+    # Get Destination Storage Account Key #
     $DestinationKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $DestinationResourceGroupName -Name $DestinationStorageAccountName).Key1
 
     # Copy the blob #    
