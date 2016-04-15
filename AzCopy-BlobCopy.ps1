@@ -36,18 +36,24 @@ Function AzCopy-BlobCopy()
             [Parameter(Mandatory=$True)]
             [string]$DestinationStorageAccountContainerName
     )
-
-    $Credential = Get-Credential -Message "Provide username and password."
     
     $AzCopyPath = "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe"
-    
-    # Login into source subscription
-    $SourceContext = Login-AzureRmAccount -Credential $Credential -SubscriptionName $SourceSubscription
 
-    if (!$SourceContext)
+    $SourceContext = Get-AzureRmContext
+
+    if ($SourceContext.Subscription.SubscriptionName -ine $SourceSubscription)
     {
-        # End if login fails
-        return    
+        # Request user login
+        $Credential = Get-Credential -Message "Provide username and password."
+        
+        # Login into source subscription
+        $SourceContext = Login-AzureRmAccount -Credential $Credential -SubscriptionName $SourceSubscription
+
+        if (!$SourceContext)
+        {
+            # End if login fails
+            return    
+        }
     }
 
     # Get source storage account key
