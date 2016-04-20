@@ -4,16 +4,16 @@ Function AzCopy-BlobCopy()
 
     .SYNOPSIS
 
-    Copies blobs inside azure, or downloads a blob to local file, or wiseversa.
+    Copies blobs inside azure, or downloads a blob to local file, or viceversa.
 
 
 
     .DESCRIPTION
 
 
-    The AzCopy-BlocbCopy function uses Azcopy to copy blobs inside Azure (including copying into other subscriptions). It also supports download of blobs and Upload of files into a blob. The
+    The AzCopy-BlobCopy function uses Azcopy to copy blobs inside Azure (including copying into other subscriptions). It also supports download of blobs and Upload of files into a blob. The
     
-    copy process runs asynchronously. 
+    copy process runs asynchronously. For more information about AzCopy see link at the end of this help.
 
 
 
@@ -34,7 +34,7 @@ Function AzCopy-BlobCopy()
 
     .PARAMETER BlobName
 
-    The name of the blob to be copied. Name is not changeabkle during copy process. Source and Destination blob have always the same name.
+    The name of the blob to be copied. Name is not changeable during copy process. Source and Destination blob have always the same name.
 
 
     .PARAMETER SourceSubscription
@@ -101,7 +101,7 @@ Function AzCopy-BlobCopy()
 
     .EXAMPLE 
 
-    Copy a blob from one azure subscription to local file.
+    Copy a blob from azure to a local file.
 
     AzCopy-BlobCopy -Download `
                 -BlobName "TestVm1.vhd" `
@@ -127,7 +127,7 @@ Function AzCopy-BlobCopy()
 
     .NOTES
 
-    This funnction includes login into azure, of no conetxt i already present.
+    This function includes login into azure, if context is not already present.
 
 
     .LINK
@@ -135,6 +135,7 @@ Function AzCopy-BlobCopy()
     https://azure.microsoft.com/de-de/documentation/articles/storage-use-azcopy/ 
 
     #>
+
     Param(  
             [Parameter(Mandatory=$True, ParameterSetName="Copy")]
             [switch]$Copy,
@@ -234,6 +235,11 @@ Function AzCopy-BlobCopy()
         # Get source storage account key
         $SourceKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $SourceResourceGroupName -Name $SourceStorageAccountName).Key1 
 
+        if (!$SourceKey)
+        {
+            $SourceKey = (Get-AzureStorageKey -StorageAccountName $SourceStorageAccountName -ErrorAction SilentlyContinue).Primary
+        }
+
         $ArgSource = "/Source:https://$($SourceStorageAccountName).blob.core.windows.net/$($SourceStorageAccountContainerName)/"
         $ArgSourceKey = "/SourceKey:$($SourceKey)"
     }
@@ -248,9 +254,14 @@ Function AzCopy-BlobCopy()
             # End if selection fails
             return    
         }
-        
+
         # Get Destination Storage Account Key
-        $DestinationKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $DestinationResourceGroupName -Name $DestinationStorageAccountName).Key1
+        $DestinationKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $DestinationResourceGroupName -Name $DestinationStorageAccountName -ErrorAction SilentlyContinue).Key1
+
+        if (!$DestinationKey)
+        {
+            $DestinationKey = (Get-AzureStorageKey -StorageAccountName $DestinationStorageAccountName -ErrorAction SilentlyContinue).Primary
+        }
 
         $ArgDest = "/Dest:https://$($DestinationStorageAccountName).blob.core.windows.net/$($DestinationStorageAccountContainerName)/"
         $ArgDestKey = "/DestKey:$($DestinationKey)"
