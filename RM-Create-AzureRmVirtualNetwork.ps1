@@ -1,4 +1,4 @@
-Function Create-AzureVirtualNetwork {
+Function Create-AzureRmVirtualNetwork {
     <#
 
         .SYNOPSIS
@@ -50,7 +50,7 @@ Function Create-AzureVirtualNetwork {
 
         .EXAMPLE 
 
-        Create-AzureVirtualNetwork -ResourceGroupName "VnetResourceGroup" -ResourceGroupLocation "west europe" -VNetName "Vnet1" -VnetAddressPrefix "10.0.0.0/16" -SubnetName "SUB1" -SubnetAddressPrefix "10.0.0.0/24"
+        Create-AzureRmVirtualNetwork -ResourceGroupName "VnetResourceGroup" -ResourceGroupLocation "west europe" -VNetName "Vnet1" -VnetAddressPrefix "10.0.0.0/16" -SubnetName "SUB1" -SubnetAddressPrefix "10.0.0.0/24"
 
     
     #>
