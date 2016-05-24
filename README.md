@@ -1,3 +1,3 @@
 # AzurePowerShellScripts
 Collection of azure powershell scripts using azure powershell version 1.0.0 or higher.
-All scripts have leading tags (Rm, or Sm), marking them for use with azure resource manager, or service manager.
+Some scripts manage azure service manager resources, others manage azure resource manager resources.
