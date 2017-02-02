@@ -1,0 +1,49 @@
+Function Get-AzureRMAuthToken
+{
+    <#
+    .SYNOPSIS
+
+    Gets Azure access token.
+
+    .DESCRIPTION
+
+    This function obtains a bearer token from microsoft azure and retuen the acces token for authentication with azure services.
+
+    .EXAMPLE
+     
+    Get-AzureAuthToken
+
+    .NOTES
+
+    This function requires Microsoft.IdentityModel.Clients.ActiveDirectory.dll. See links section.
+    Azure AD application is needed for authentication. See link section for tutorial link.
+
+    Set $clientID, $clientSecret and $tenantId according to your application settings. (line 32 following)
+
+    .LINK
+    
+    Get Microsoft.IdentityModel.Clients.ActiveDirectory.dll here: https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/
+    How to create Azure AD Application: https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal 
+    #>
+
+    # Path to Microsoft.IdentityModel.Clients.ActiveDirectory.dll. Change if needed
+    Add-Type -Path "${env:ProgramFiles(x86)}\Microsoft SDKs\Azure\PowerShell\ServiceManagement\Azure\Services\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"
+
+    $clientId = "<ClientId of yout Azure AD Application>"
+    $clientSecret = "<Client secret of your Azure AD application>"
+    $tenantId = "<Your tenant Id>"
+    $apiEndpoint = "https://management.core.windows.net/" 
+    $authString = "https://login.windows.net/$tenantId";
+ 
+    # Create context for login.windows.net
+    [Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext]$AuthContext = [Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext]$authString
+ 
+    # Create credential from client id and client secret
+    [Microsoft.IdentityModel.Clients.ActiveDirectory.ClientCredential]$clientCredential = New-Object -TypeName "Microsoft.IdentityModel.Clients.ActiveDirectory.ClientCredential"($clientId, $clientSecret)
+ 
+    # Request bearer token
+    $authenticationResult = $AuthContext.AcquireToken($apiEndpoint, $clientCredential)
+
+    # Return access token
+    return $authenticationResult.AccessToken
+}
